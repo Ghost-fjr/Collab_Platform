@@ -108,7 +108,7 @@ function Home() {
     <div className={styles.container}>
       {/* Hero Section */}
       <div className={styles.hero}>
-        <h1 className={styles.heroTitle}>Welcome Back</h1>
+        <h1 className={styles.heroTitle}>Welcome Back to PMYG!!😊</h1>
         <p className={styles.heroSubtitle}>
           Manage your projects, track issues, and collaborate with your team in one place.
         </p>

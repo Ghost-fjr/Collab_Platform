@@ -5,7 +5,7 @@
 // - Real-time messaging interface
 // - Support for project and direct message rooms
 // -----------------------------------------------------------------------------
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axiosClient from '../api/axiosClient';
 import { useToast } from '../context/ToastContext';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -21,25 +21,9 @@ export default function Chats() {
   const { showToast } = useToast();
 
   // ---------------------------------------------------------------------------
-  // Fetch chat rooms on mount
-  // ---------------------------------------------------------------------------
-  useEffect(() => {
-    fetchRooms();
-  }, []);
-
-  // ---------------------------------------------------------------------------
-  // Fetch messages when room is selected
-  // ---------------------------------------------------------------------------
-  useEffect(() => {
-    if (selectedRoom) {
-      fetchMessages(selectedRoom.id);
-    }
-  }, [selectedRoom]);
-
-  // ---------------------------------------------------------------------------
   // Fetch all chat rooms
   // ---------------------------------------------------------------------------
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     try {
       const res = await axiosClient.get('/chat-rooms/');
       setRooms(res.data.results || res.data);
@@ -49,12 +33,12 @@ export default function Chats() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   // ---------------------------------------------------------------------------
   // Fetch messages for a room
   // ---------------------------------------------------------------------------
-  const fetchMessages = async (roomId) => {
+  const fetchMessages = useCallback(async (roomId) => {
     try {
       const res = await axiosClient.get(`/chat-rooms/${roomId}/`);
       setMessages(res.data.messages || []);
@@ -62,7 +46,23 @@ export default function Chats() {
       console.error(err);
       showToast('Failed to load messages', 'error');
     }
-  };
+  }, [showToast]);
+
+  // ---------------------------------------------------------------------------
+  // Fetch chat rooms on mount
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    fetchRooms();
+  }, [fetchRooms]);
+
+  // ---------------------------------------------------------------------------
+  // Fetch messages when room is selected
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (selectedRoom) {
+      fetchMessages(selectedRoom.id);
+    }
+  }, [selectedRoom, fetchMessages]);
 
   // ---------------------------------------------------------------------------
   // Send a new message
